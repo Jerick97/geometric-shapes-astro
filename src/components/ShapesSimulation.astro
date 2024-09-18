@@ -1,0 +1,234 @@
+<canvas id="shapes-canvas" width="480" height="320" class="gba-screen"></canvas>
+
+<script>
+	const COLORS = ["#8bac0f", "#306230", "#0f380f", "#9bbc0f"];
+	const SHAPES = ["square", "circle", "triangle", "pentagon"];
+	const GRAVITY = 0.5;
+	const MAX_SHAPES = 30;
+	const MAX_JUMP_FORCE = -14;
+	const BOUNCE_FACTOR = 0.7;
+	const JUMP_FORCE_MULTIPLIER = 10;
+
+	class Shape {
+		constructor(x, y, type, color) {
+			this.x = x;
+			this.y = y;
+			this.type = type;
+			this.color = color;
+			this.originalColor = color;
+			this.size = 25;
+			this.velocity = { x: (Math.random() - 0.5) * 5, y: 0 };
+			this.isSelected = false;
+			this.clickStartTime = 0;
+		}
+
+		draw(ctx) {
+			ctx.fillStyle = this.isSelected ? "#ff0000" : this.color;
+			ctx.beginPath();
+
+			switch (this.type) {
+				case "square":
+					ctx.rect(
+						this.x - this.size / 2,
+						this.y - this.size / 2,
+						this.size,
+						this.size
+					);
+					break;
+				case "circle":
+					ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
+					break;
+				case "triangle":
+					ctx.moveTo(this.x, this.y - this.size / 2);
+					ctx.lineTo(this.x - this.size / 2, this.y + this.size / 2);
+					ctx.lineTo(this.x + this.size / 2, this.y + this.size / 2);
+					ctx.closePath();
+					break;
+				case "pentagon":
+					for (let i = 0; i < 5; i++) {
+						const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+						const x = this.x + (this.size / 2) * Math.cos(angle);
+						const y = this.y + (this.size / 2) * Math.sin(angle);
+						if (i === 0) ctx.moveTo(x, y);
+						else ctx.lineTo(x, y);
+					}
+					ctx.closePath();
+					break;
+			}
+
+			ctx.fill();
+		}
+
+		update(canvasWidth, canvasHeight, shapes) {
+			this.velocity.y += GRAVITY; // Aplicar la gravedad
+
+			let newX = this.x + this.velocity.x;
+			let newY = this.y + this.velocity.y;
+
+			// Verificar colisiones con otras figuras
+			for (let shape of shapes) {
+				if (shape !== this) {
+					const collision = this.checkCollision(shape, newX, newY);
+					if (collision) {
+						if (collision.direction === "vertical") {
+							newY = collision.y;
+							this.velocity.y *= -BOUNCE_FACTOR;
+						} else if (collision.direction === "horizontal") {
+							newX = collision.x;
+							this.velocity.x *= -BOUNCE_FACTOR;
+						}
+					}
+				}
+			}
+
+			// Verificar colisiones con los bordes del lienzo
+			if (newX - this.size / 2 < 0 || newX + this.size / 2 > canvasWidth) {
+				this.velocity.x *= -BOUNCE_FACTOR;
+				newX = Math.max(
+					this.size / 2,
+					Math.min(canvasWidth - this.size / 2, newX)
+				);
+			}
+
+			if (newY - this.size / 2 < 0) {
+				newY = this.size / 2;
+				this.velocity.y *= -BOUNCE_FACTOR;
+			} else if (newY + this.size / 2 > canvasHeight) {
+				newY = canvasHeight - this.size / 2;
+				this.velocity.y *= -BOUNCE_FACTOR;
+			}
+
+			this.x = newX;
+			this.y = newY;
+
+			// Aplicar fricción
+			this.velocity.x *= 0.99;
+			this.velocity.y *= 0.99;
+		}
+
+		checkCollision(other, newX, newY) {
+			const dx = newX - other.x;
+			const dy = newY - other.y;
+			const distance = Math.sqrt(dx * dx + dy * dy);
+
+			// Check if the distance is less than the sum of radii
+			if (distance < this.size / 2 + other.size / 2) {
+				const angle = Math.atan2(dy, dx);
+				const targetX =
+					other.x + Math.cos(angle) * (this.size / 2 + other.size / 2);
+				const targetY =
+					other.y + Math.sin(angle) * (this.size / 2 + other.size / 2);
+
+				// Determine the collision direction
+				if (Math.abs(dx) > Math.abs(dy)) {
+					return { direction: "horizontal", x: targetX };
+				} else {
+					return { direction: "vertical", y: targetY };
+				}
+			}
+
+			return null;
+		}
+
+		containsPoint(x, y) {
+			const dx = x - this.x;
+			const dy = y - this.y;
+			return Math.sqrt(dx * dx + dy * dy) < this.size / 2;
+		}
+	}
+
+	document.addEventListener("DOMContentLoaded", () => {
+		const canvas = document.getElementById("shapes-canvas");
+		const ctx = canvas.getContext("2d");
+		const shapes = [];
+
+		const addShape = () => {
+			if (shapes.length < MAX_SHAPES) {
+				const newShape = new Shape(
+					Math.random() * (canvas.width - 50) + 25,
+					0,
+					SHAPES[Math.floor(Math.random() * SHAPES.length)],
+					COLORS[Math.floor(Math.random() * COLORS.length)]
+				);
+				shapes.push(newShape);
+			}
+		};
+
+		const handleMouseDown = (event) => {
+			const rect = canvas.getBoundingClientRect();
+			const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+			const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+
+			shapes.forEach((shape) => {
+				if (shape.containsPoint(x, y)) {
+					shape.isSelected = true;
+					shape.clickStartTime = Date.now(); // Guardar el tiempo de inicio del clic
+					shape.color = "#ff0000"; // Cambiar el color cuando se selecciona
+				}
+			});
+		};
+
+		const handleMouseUp = () => {
+			shapes.forEach((shape) => {
+				if (shape.isSelected) {
+					const clickDuration = (Date.now() - shape.clickStartTime) / 1000; // Duración del clic en segundos
+					const jumpForce = Math.max(
+						clickDuration * JUMP_FORCE_MULTIPLIER,
+						MAX_JUMP_FORCE
+					); // Calcular la fuerza de salto
+					shape.velocity.y = jumpForce; // Aplicar la fuerza de salto
+					shape.isSelected = false; // Desmarcar la figura como seleccionada
+					shape.color = shape.originalColor; // Restaurar el color original
+				}
+			});
+		};
+
+		const animate = () => {
+			ctx.fillStyle = "#e0f8cf";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			shapes.forEach((shape) => {
+				shape.update(canvas.width, canvas.height, shapes);
+				shape.draw(ctx);
+			});
+			requestAnimationFrame(animate);
+		};
+
+		canvas.addEventListener("mousedown", handleMouseDown);
+		canvas.addEventListener("mouseup", handleMouseUp);
+		canvas.addEventListener("mouseleave", handleMouseUp);
+		const intervalId = setInterval(addShape, 500);
+		animate();
+
+		return () => {
+			canvas.removeEventListener("mousedown", handleMouseDown);
+			canvas.removeEventListener("mouseup", handleMouseUp);
+			canvas.removeEventListener("mouseleave", handleMouseUp);
+			clearInterval(intervalId);
+		};
+	});
+</script>
+
+<style>
+	.gba-screen {
+		width: 960px;
+		height: 640px;
+		image-rendering: pixelated;
+		background-color: #e0f8cf;
+		border: 20px solid #8bac0f;
+		border-radius: 10px;
+		box-shadow:
+			0 0 10px rgba(0, 0, 0, 0.3),
+			inset 0 0 5px rgba(0, 0, 0, 0.5);
+	}
+
+	body {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		height: 100vh;
+		margin: 0;
+		background-color: #306230;
+		font-family: Arial, sans-serif;
+	}
+</style>
