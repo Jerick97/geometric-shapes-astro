@@ -1,47 +1,41 @@
-# Astro Starter Kit: Minimal
+# Geometric Shapes 2D
 
-```sh
-npm create astro@latest -- --template minimal
-```
+**Geometric Shapes 2D** es un proyecto interactivo creado como mi primer proyecto con Astro. En este proyecto, figuras geométricas caen desde la parte superior del canvas y, al hacer clic y mantener el mouse presionado sobre una figura, su velocidad aumenta proporcionalmente al tiempo que se mantiene el clic.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+## Tecnologías Utilizadas
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+- **Astro:** Framework para generar sitios web modernos y rápidos.
+- **JavaScript:** Lenguaje de programación utilizado para la lógica del juego y la interacción.
+- **CSS:** Estilos para el diseño y la presentación del canvas.
 
-## 🚀 Project Structure
+## Descripción del Proyecto
 
-Inside of your Astro project, you'll see the following folders and files:
+En **Geometric Shapes 2D**, las figuras geométricas caen por la pantalla bajo la influencia de la gravedad. Al hacer clic en una figura y mantener el clic presionado, la figura se moverá hacia arriba con una velocidad que aumenta de acuerdo con la duración del clic. La aplicación simula un entorno físico simple con colisiones entre figuras y los bordes del canvas.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+El proyecto fue desarrollado como una oportunidad para aprender y experimentar con Astro, y aunque todavía me queda mucho por aprender sobre este framework, estoy muy orgulloso del resultado.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Capturas de Pantalla
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Aquí se muestran algunas capturas de pantalla de la aplicación:
 
-Any static assets, like images, can be placed in the `public/` directory.
+<center>
+    <table>
+        <tr>
+            <td>
+                <img src="screen/screen1.png" alt="Screenshot 1" style="width:100%;"/>
+            </td>
+            <td>
+                <img src="screen/screen2.png" alt="Screenshot 2" style="width:100%;"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <img src="screen/screen3.png" alt="Screenshot 3" style="width:100%;">
+            </td>
+        </tr>
+    </table>
+</center>
 
-## 🧞 Commands
+## Agradecimientos
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Quiero agradecer a la empresa **Ludik** por la prueba técnica que me permitió desarrollar este proyecto. También quiero expresar mi gratitud a Fazt Code y otros tutoriales de YouTube que me ayudaron a aprender sobre Astro y mejorar mis habilidades en desarrollo web.
